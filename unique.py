@@ -42,7 +42,7 @@ chat_session = model.start_chat(
   history=[
   ]
 )
-speak("Hello, I am Gemini. How can I help you today?")
+speak("Hello, I am unik. How can I help you today?")
 INPUT = get_user_input()
 response = chat_session.send_message(INPUT, stream=True)
 
