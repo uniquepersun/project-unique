@@ -24,8 +24,26 @@ def get_user_input():
 
 def speak(text):
     engine = pyttsx3.init()
+    engine.setProperty("rate", 300)
+    engine.setProperty("pitch", 1.2)
     engine.say(text)
     engine.runAndWait()
+
+def savechathistory(history, filename="history.txt"):
+  with open(filename, "w") as file:
+    for line in history:
+      file.write(line + "\n")
+
+def loadchathistory(filename="history.txt"):
+  history = []
+  with open(filename, "r") as file:
+    for line in file:
+      history.append(line.strip())
+  return history
+
+history = loadchathistory()
+
+speak("Hello, I am unik. How can I help you today?")
 
 generation_config = {
   "temperature": 1,
@@ -39,13 +57,13 @@ model = genai.GenerativeModel(
   generation_config=generation_config,
 )
 chat_session = model.start_chat(
-  history=[
-  ]
+   history=[history]
 )
-speak("Hello, I am unik. How can I help you today?")
-INPUT = get_user_input()
-response = chat_session.send_message(INPUT, stream=True)
 
-for chunk in response:
-  print(chunk.text)
-  speak(chunk.text)
+INPUT =get_user_input()
+response = chat_session.send_message(INPUT, stream=True)
+print(response.text)
+# for chunk in response:
+#   print(chunk.text)
+savechathistory(history + [INPUT, response.text])
+speak(response.text)
