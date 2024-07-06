@@ -1,13 +1,13 @@
 import speech_recognition as sr
 import pyttsx3
-# import gTTS
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
+from gtts import gTTS
+
 
 load_dotenv()
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-                
 
 def get_user_input():
     r = sr.Recognizer()
@@ -20,30 +20,18 @@ def get_user_input():
         return text
     except sr.UnknownValueError:
         print("Say it out clearly, I couldn't get that.")
-        return input("Speak again or type your input: ")
+        speak("Say it out clearly, I couldn't get that. Now please type your input: ")
+        return input("Type your input: ")
 
 def speak(text):
     engine = pyttsx3.init()
-    engine.setProperty("rate", 300)
-    engine.setProperty("pitch", 1.2)
+    engine.setProperty("rate", 225)
+    engine.setProperty("pitch", 2)
+    engine.setProperty("language", "hi, en-IN")
     engine.say(text)
     engine.runAndWait()
 
-def savechathistory(history, filename="history.txt"):
-  with open(filename, "w") as file:
-    for line in history:
-      file.write(line + "\n")
-
-def loadchathistory(filename="history.txt"):
-  history = []
-  with open(filename, "r") as file:
-    for line in file:
-      history.append(line.strip())
-  return history
-
-history = loadchathistory()
-
-speak("Hello, I am unik. How can I help you today?")
+speak("Hello, I am unik. How can I help you?")
 
 generation_config = {
   "temperature": 1,
@@ -57,13 +45,16 @@ model = genai.GenerativeModel(
   generation_config=generation_config,
 )
 chat_session = model.start_chat(
-   history=[history]
+   history=[]
 )
 
-INPUT =get_user_input()
-response = chat_session.send_message(INPUT, stream=True)
-print(response.text)
-# for chunk in response:
-#   print(chunk.text)
-savechathistory(history + [INPUT, response.text])
-speak(response.text)
+while True:
+    INPUT = get_user_input()
+    if "exit chat" in INPUT:
+        print("Goodbye!")
+        speak("Goodbye!")
+        break
+    response = chat_session.send_message(INPUT, stream=False)
+    for chunk in response:
+        print(chunk.text)
+    speak(chunk.text)
