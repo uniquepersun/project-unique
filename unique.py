@@ -1,13 +1,16 @@
 import speech_recognition as sr
-import pyttsx3
 import google.generativeai as genai
-import os
-from dotenv import load_dotenv
 from gtts import gTTS
-
+from dotenv import load_dotenv
+import os
 
 load_dotenv()
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+
+def speak(text):
+    tts = gTTS(text=text, lang="en")
+    tts.save("output.mp3")
+    os.system("output.mp3")
 
 def get_user_input():
     r = sr.Recognizer()
@@ -20,18 +23,8 @@ def get_user_input():
         return text
     except sr.UnknownValueError:
         print("Say it out clearly, I couldn't get that.")
-        speak("Say it out clearly, I couldn't get that. Now please type your input: ")
-        return input("Type your input: ")
-
-def speak(text):
-    engine = pyttsx3.init()
-    engine.setProperty("rate", 225)
-    engine.setProperty("pitch", 2)
-    engine.setProperty("language", "hi, en-IN")
-    engine.say(text)
-    engine.runAndWait()
-
-speak("Hello, I am unik. How can I help you?")
+        speak("Say it out clearly, I couldn't get that.")
+        return input("what's your input: ")
 
 generation_config = {
   "temperature": 1,
@@ -54,7 +47,8 @@ while True:
         print("Goodbye!")
         speak("Goodbye!")
         break
-    response = chat_session.send_message(INPUT, stream=False)
+    response = chat_session.send_message(INPUT, stream=True)
     for chunk in response:
         print(chunk.text)
     speak(chunk.text)
+    
